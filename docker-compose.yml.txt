@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  my-service:
+    image: node:16
+    container_name: my-node-app
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - ENV_VAR_NAME=value

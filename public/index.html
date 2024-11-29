@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <link rel="stylesheet" href="/style.css"> <!-- CSS 파일 연결 -->
+    <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet"> <!-- 폰트 추가 -->
+</head>
+<body>
+    <h2>채팅 테스트용 <br /> 소켓과 도커를 공부하기 위한 테스트 사이트</h2>
+    <div class="chat-container">
+        <ul id="messages" class="chat"></ul> <!-- 메시지 리스트 -->
+        <input id="input" type="text" class="text_input" placeholder="Type a message...">
+        <button id="send">Send</button> <!-- 메시지 전송 버튼 -->
+    </div>
+    <footer>
+        
+    </footer>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+const messages = []; // 메시지 기록 배열
+
+// 메시지 전송
+document.getElementById('send').addEventListener('click', () => {
+    const input = document.getElementById('input');
+    if (input.value.trim()) {
+        const message = {
+            id: Date.now(), // 고유 ID (타임스탬프 사용)
+            text: input.value,
+            from: 'me', // 메시지 보낸 주체 표시
+        };
+
+        // 메시지 기록에 추가
+        messages.push(message);
+
+        // 보낸 메시지를 화면에 추가 (우측 정렬)
+        addMessageToUI(message);
+
+        // 서버로 메시지 전송
+        socket.emit('chat message', message);
+
+        input.value = ''; // 입력창 초기화
+    }
+});
+
+// 서버로부터 메시지 수신
+socket.on('chat message', (msg) => {
+    // 수신 메시지가 이미 기록된 메시지인지 확인
+    const exists = messages.find((m) => m.id === msg.id);
+    if (!exists) {
+        msg.from = 'other'; // 수신 메시지 주체 표시
+        messages.push(msg); // 메시지 기록에 추가
+        addMessageToUI(msg); // 수신 메시지를 화면에 추가
+    }
+});
+
+// 메시지를 화면에 추가하는 함수
+function addMessageToUI(message) {
+    const li = document.createElement('li');
+    li.textContent = message.text;
+
+    if (message.from === 'me') {
+        li.classList.add('message', 'right'); // 보낸 메시지 스타일
+    } else {
+        li.classList.add('message', 'left'); // 받은 메시지 스타일
+    }
+
+    document.getElementById('messages').appendChild(li);
+}
+
+
+    </script>
+</body>
+</html>
